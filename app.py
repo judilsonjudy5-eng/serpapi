@@ -143,6 +143,14 @@ def opcoes_reserva_voo(
         **extra,
     }, api_key)
 
+def resolver_lugar(texto):
+    sug = autocompletar_voos(texto).get("suggestions", [])
+    return [
+        {"nome": s["name"], "tipo": s.get("type"), "id": s["id"],
+         "aeroportos": [a["id"] for a in s.get("airports", [])]}
+        for s in sug
+    ]
+
 
 def autocompletar_voos(texto: str, idioma: str = "pt", api_key: str | None = None, **extra) -> dict:
     """Google Flights Autocomplete: sugere aeroportos/cidades. [CONFIRMAR engine]"""
@@ -471,7 +479,7 @@ def imagens_destino(consulta: str, idioma: str = "pt", api_key: str | None = Non
 
 
 # ---------------------------------------------------------------------------
-# Resumos compactos para enviar ao LLM do bot
+# Resumos compactos
 # ---------------------------------------------------------------------------
 
 def resumir_voos(dados: dict, limite: int = 5) -> list[dict]:
@@ -522,8 +530,8 @@ def resumir_hoteis_google(dados: dict, limite: int = 5) -> list[dict]:
             "nota": p.get("overall_rating"),
             "avaliacoes": p.get("reviews"),
             "estrelas": p.get("extracted_hotel_class"),
-            "preco_noite": (p.get("rate_per_night") or {}).get("lowest"),
-            "preco_total": (p.get("total_rate") or {}).get("lowest"),
+            "preco_noite": (p.get("rate_per_night") or {}).get("extracted_lowest"),
+            "preco_total": (p.get("total_rate") or {}).get("extracted_lowest"),
             "property_token": p.get("property_token"),
         })
     return saida
@@ -551,8 +559,120 @@ if __name__ == "__main__":
     ida = (date.today() + timedelta(days=30)).isoformat()
     volta = (date.today() + timedelta(days=37)).isoformat()
 
-    voos = pesquisar_voos("LIS", "GRU", ida, volta)
-    print(resumir_voos(voos))
+    # ------------------------------------------------------------------ VOOS
 
-    booking = pesquisar_booking("Lisboa", ida, volta, ordenar_por="review_score_and_price")
-    print(resumir_booking(booking))
+    #print(resolver_lugar("Londres"))
+    #voos = pesquisar_voos("BSB", "MRS", ida, volta)
+    #print(resumir_voos(voos))
+    #sug = autocompletar_voos("Londres")
+    #print(sug)
+ 
+    #token_voo = resumir_voos(voos, limite=1)[0]["booking_token"]
+    #opcoes = opcoes_reserva_voo(token_voo, "LIS", "GRU", ida, volta)
+    #print(opcoes)
+ 
+    #sugestoes = autocompletar_voos("Lisb")
+    #print(sugestoes)
+ 
+    #ofertas = ofertas_voos("LIS")
+    #print(ofertas)
+ 
+    #destinos = explorar_destinos("LIS", ida, volta)
+    #print(destinos)
+ 
+    #radar = estado_voo_tempo_real()
+    #print(radar)
+ 
+    # ---------------------------------------------------------------- HOTÉIS
+    hoteis = pesquisar_hoteis("Hotéis em Lisboa", ida, volta)
+    print(resumir_hoteis_google(hoteis))
+ 
+    #token_hotel = resumir_hoteis_google(hoteis, limite=1)[0]["property_token"]
+ 
+    #detalhes = detalhes_hotel(token_hotel, ida, volta)
+    #print(detalhes)
+ 
+    #avaliacoes = avaliacoes_hotel(token_hotel)
+    #print(resumir_avaliacoes_hotel(avaliacoes))
+ 
+    #fotos = fotos_hotel(token_hotel)
+    #print(fotos)
+ 
+    #calendario = calendario_precos_hotel(token_hotel)
+    #print(calendario)
+ 
+    #sugestoes_h = autocompletar_hoteis("Lisb")
+    #print(sugestoes_h)
+ 
+    #booking = pesquisar_booking("Lisboa", ida, volta, ordenar_por="review_score_and_price")
+    #print(resumir_booking(booking))
+ 
+    #booking_familia = pesquisar_booking("Paris", ida, volta, adultos=2, criancas=2, idades_criancas=[5, 9])
+    #print(resumir_booking(booking_familia))
+ 
+    #airbnb = pesquisar_airbnb("Lisboa", ida, volta)
+    #print(airbnb)
+ 
+    # --------------------------------------------------- DESTINO E EXPERIÊNCIAS
+    #locais = pesquisar_locais_maps("restaurantes em Lisboa")
+    #print(locais.get("local_results", [])[:3])
+ 
+    #data_id = locais["local_results"][0]["data_id"]
+ 
+    #detalhes_local = detalhes_local_maps(data_id)
+    #print(detalhes_local)
+ 
+    #aval_maps = avaliacoes_maps(data_id)
+    #print(aval_maps)
+ 
+    #fotos_local = fotos_maps(data_id)
+    #print(fotos_local)
+ 
+    #rota = direcoes_maps("Aeroporto de Lisboa", "Torre de Belém")
+    #print(rota)
+ 
+    #eventos = eventos_destino("eventos em Lisboa")
+    #print(eventos)
+ 
+    #trip = pesquisar_tripadvisor("o que fazer em Lisboa")
+    #print(trip)
+ 
+    #trip_local = local_tripadvisor("ID_DO_RESULTADO_TRIPADVISOR")
+    #print(trip_local)
+ 
+    #trip_aval = avaliacoes_tripadvisor("ID_DO_RESULTADO_TRIPADVISOR")
+    #print(trip_aval)
+ 
+    #yelp = pesquisar_yelp("restaurants", "Miami, FL")
+    #print(yelp)
+ 
+    #yelp_loc = local_yelp("ID_DO_RESULTADO_YELP")
+    #print(yelp_loc)
+ 
+    #yelp_aval = avaliacoes_yelp("ID_DO_RESULTADO_YELP")
+    #print(yelp_aval)
+ 
+    #opentable = avaliacoes_opentable("ID_DO_RESTAURANTE")
+    #print(opentable)
+ 
+    #traducao = traduzir("Onde fica a estação de comboios?", "ja", "pt")
+    #print(traducao)
+ 
+    #noticias = noticias_destino("greve transportes Lisboa", pais="pt")
+    #print(noticias)
+ 
+    # ------------------------------------------------ MARKETING E CONCORRÊNCIA
+    #tendencias = tendencias_google("viagem Lisboa", "TIMESERIES")
+    #print(tendencias)
+ 
+    #tendencias_regiao = tendencias_google("viagem Lisboa", "GEO_MAP")
+    #print(tendencias_regiao)
+ 
+    #anuncios_g = anuncios_google_transparencia(text="agência de viagens")
+    #print(anuncios_g)
+ 
+    #anuncios_m = anuncios_meta("agência de viagens", "PT")
+    #print(anuncios_m)
+ 
+    #imagens = imagens_destino("praia do Algarve")
+    #print(imagens)
